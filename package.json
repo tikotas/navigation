@@ -1,0 +1,48 @@
+{
+  "name": "map-navigation-v",
+  "version": "0.0.20",
+  "description": "A helper and component library for react-native-maps that enables navigation support",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tikotas/navigation.git"
+  },
+  "keywords": [
+    "react",
+    "native",
+    "react-native",
+    "react-native-maps",
+    "maps",
+    "navigation",
+    "gps",
+    "ios",
+    "android",
+    "react-component",
+    "map-navigation"
+  ],
+  "author": "tikotas",
+  "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "preset": "react-native"
+  },
+  "homepage": "https://github.com/tikotas/navigation#readme",
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-maps": ">=0.21.0"
+  },
+  "dependencies": {
+    "@react-native-community/geolocation": "^3.0.4",
+    "geolib": "^3.0.2",
+    "prop-types": "^15.6.2",
+    "react-native-optiongroup": "^0.0.7"
+  },
+  "rnpm": {
+    "assets": [
+      "./assets/fonts"
+    ]
+  }
+}
