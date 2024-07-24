@@ -5,7 +5,7 @@ import {toQueryParams, toLatLng, toCoordinate} from './Tools';
 import TravelModes from '../constants/TravelModes';
 import * as MarkerTypes from '../constants/MarkerTypes'
 import * as PolylineTypes from '../constants/PolylineTypes';
-import DirectionTypes, { DEFAULT_DIRECTION_TYPE} from '../constants/DirectionTypes';
+import DirectionTypes, {DEFAULT_DIRECTION_TYPE} from '../constants/DirectionTypes';
 import * as GeoLib from 'geolib';
 import NavigationIcons from "../constants/NavigationIcons";
 
@@ -19,8 +19,7 @@ export default class Directions {
      * @param apiKey
      * @param options
      */
-    constructor(apiKey, options = false)
-    {
+    constructor(apiKey, options = false) {
         this.apiKey = apiKey;
         this.options = options || {};
     }
@@ -32,8 +31,7 @@ export default class Directions {
      * @param options
      * @returns {Promise<Response>}
      */
-    fetch(origin, destination, options = false)
-    {
+    fetch(origin, destination, options = false) {
         options = Object.assign({
             key: this.apiKey,
             mode: TravelModes.DRIVING
@@ -45,7 +43,7 @@ export default class Directions {
             ...options,
         };
 
-        if(queryParams.mode) queryParams.mode = queryParams.mode.toLowerCase();
+        if (queryParams.mode) queryParams.mode = queryParams.mode.toLowerCase();
 
         const url = `https://maps.google.com/maps/api/directions/json?${toQueryParams(queryParams)}`;
 
@@ -67,16 +65,16 @@ export default class Directions {
      * @param json
      * @returns {*}
      */
-    parse(json)
-    {
+    parse(json) {
         // parse each route
-        if(!json.routes.length) return [];
+        if (!json.routes.length) return [];
 
         return json.routes.map(route => {
 
             if (!route.legs.length) return null;
 
             const leg = route.legs[0]; // only support primary leg - waypoint support is later
+
 
             // create markers
             const markers = [
@@ -100,11 +98,19 @@ export default class Directions {
                 )
             );
 
+            const getAllCoordinates = (polylines) => {
+                return polylines.reduce((acc, polyline) => {
+                        return acc.concat(polyline.coordinates)
+                    }, []
+                )
+
+            }
+
             steps.push({
                 final: true,
-                bearing: steps[steps.length-1].bearing,
-                compass: steps[steps.length-1].compass,
-                start: steps[steps.length-1].end,
+                bearing: steps[steps.length - 1].bearing,
+                compass: steps[steps.length - 1].compass,
+                start: steps[steps.length - 1].end,
                 end: false,
                 maneuver: {
                     name: 'flag',
@@ -126,6 +132,7 @@ export default class Directions {
                 markers,
                 steps,
                 polylines,
+                totalCoordinates: getAllCoordinates(polylines),
                 bounds: {
                     boundingBox,
                     center: GeoLib.getCenter(boundingBox),
@@ -181,8 +188,7 @@ export default class Directions {
      * @param step
      * @returns {{name: *, type: *}}
      */
-    decodeManeuver(step)
-    {
+    decodeManeuver(step) {
         const maneuver = step.maneuver ? step.maneuver : DEFAULT_DIRECTION_TYPE;
 
         const name = (maneuver.split("-").map((d, i) => i == 0 ? d : d[0].toUpperCase() + d.slice(1))).join("");
@@ -198,9 +204,8 @@ export default class Directions {
      * @param bearing
      * @returns {{detail: *, simple: *}}
      */
-    decodeCompass(bearing)
-    {
-        if(bearing < 0) return false;
+    decodeCompass(bearing) {
+        if (bearing < 0) return false;
 
         const compass = [
             DirectionTypes.NORTH,
@@ -222,7 +227,7 @@ export default class Directions {
 
         const calc = a => {
             let c = Math.ceil(bearing / (360 / a.length)) - 1;
-            return a[c < 0 ? 0 : (c > (a.length-1)) ? (a.length-1) : c];
+            return a[c < 0 ? 0 : (c > (a.length - 1)) ? (a.length - 1) : c];
         }
 
         return {
@@ -238,8 +243,7 @@ export default class Directions {
      * @param e
      * @returns {{latitude: *, longitude: *}[]}
      */
-    decodePolylineToCoordinates(t, e)
-    {
+    decodePolylineToCoordinates(t, e) {
         for (var n, o, u = 0, l = 0, r = 0, d = [], h = 0, i = 0, a = null, c = Math.pow(10, e || 5); u < t.length;) {
             a = null, h = 0, i = 0;
             do a = t.charCodeAt(u++) - 63, i |= (31 & a) << h, h += 5; while (a >= 32);
@@ -248,7 +252,7 @@ export default class Directions {
             o = 1 & i ? ~(i >> 1) : i >> 1, l += n, r += o, d.push([l / c, r / c]);
         }
 
-        return d = d.map(function(t) {
+        return d = d.map(function (t) {
             return {
                 latitude: t[0],
                 longitude: t[1],
