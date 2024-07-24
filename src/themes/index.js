@@ -5,6 +5,12 @@ import * as MarkerTypes from '../constants/MarkerTypes';
 import * as PolylineTypes from '../constants/PolylineTypes';
 import NavigationIcons from '../constants/NavigationIcons';
 
+const imagePath = {
+    roadStart: require("../../assets/image/roadStart.png"),
+    roadEnd: require("../../assets/image/roadEnd.png"),
+}
+
+
 /**
  * defaultThemeSettings
  * @type {{[p: string]: *}}
@@ -16,13 +22,14 @@ export const defaultThemeSettings = {
      */
     Markers: {
         [MarkerTypes.ORIGIN]: {
-            icon: NavigationIcons.place,
+            // icon: NavigationIcons.place,
+            icon: imagePath.roadStart,
             color: '#77dd77',
             fontSize: 40,
         },
 
         [MarkerTypes.DESTINATION]: {
-            icon: NavigationIcons.place,
+            icon: imagePath.roadEnd,
             color: '#ff4500',
             fontSize: 40,
         },

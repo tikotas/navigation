@@ -20,6 +20,7 @@ import PositionMarker from '../PositionMarker';
 import { POSITION_ARROW } from "../../constants/MarkerTypes";
 import { Circle, Polygon, Polyline } from 'react-native-maps';
 
+const CONSTANT_VALUE = 20
 
 /**
  * @component
@@ -55,7 +56,8 @@ export default class MapViewNavigation extends Component {
         displayDebugMarkers: PropTypes.bool,
         simulate: PropTypes.bool,
         options: PropTypes.object,
-        onPositionChanged: PropTypes.func
+        onPositionChanged: PropTypes.func,
+        dimensionWidth: PropTypes.number.isRequired,
     }
 
     /**
@@ -87,7 +89,8 @@ export default class MapViewNavigation extends Component {
         displayDebugMarkers: false,
         simulate: false,
         onPositionChanged: undefined,
-        options: {}
+        options: {},
+        dimensionWidth: undefined
     }
 
     /**
@@ -256,7 +259,8 @@ export default class MapViewNavigation extends Component {
 
             if (!nextStep && trap.isCenter()) {
 
-                this.props.onNavigationCompleted && this.props.onNavigationCompleted();
+                this.props.onNavigationCompleted && this.props.onNavigationCompleted()
+                this.clearRoute();
 
                 return this.setState({
                     navigationMode: NavigationModes.IDLE,
@@ -374,12 +378,23 @@ export default class MapViewNavigation extends Component {
     displayRoute(origin, destination, options = false) {
         return this.prepareRoute(origin, destination, options).then(route => {
 
-            const region = {
-                ...route.bounds.center,
-                ...this.getBoundingBoxZoomValue(route.bounds.boundingBox, this.props.directionZoomQuantifier)
-            }
-
-            this.props.map().animateToRegion(region, this.props.animationDuration);
+            // const region = {
+            //     ...route.bounds.center,
+            //     ...this.getBoundingBoxZoomValue(route.bounds.boundingBox, this.props.directionZoomQuantifier)
+            // }
+            //
+            // this.props.map().animateToRegion(region, this.props.animationDuration);
+            console.log(this.props.map(), "MAP PROPS!!!!")
+            console.log(route, "ROUTE-----")
+            console.log(this.props.dimensionWidth, "dimensionWidth-----")
+            this.props.map().fitToCoordinates(route.totalCoordinates, {
+                edgePadding: {
+                    right: this.props.dimensionWidth / CONSTANT_VALUE,
+                    top: this.props.dimensionWidth / CONSTANT_VALUE,
+                    left: this.props.dimensionWidth / CONSTANT_VALUE,
+                    bottom: this.props.dimensionWidth / CONSTANT_VALUE,
+                },
+            })
 
             if (!this.state.navigationMode == NavigationModes.ROUTE) {
                 this.setState({
