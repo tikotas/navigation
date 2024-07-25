@@ -1,7 +1,7 @@
 /**
  * @imports
  */
-import { StyleSheet} from 'react-native';
+import {Dimensions, StyleSheet} from 'react-native';
 import { IconFont } from '../../constants/NavigationIcons';
 
 
@@ -15,10 +15,15 @@ export default props => StyleSheet.create({
      */
     maneuverView: {
         padding: 15,
-        backgroundColor: props.backgroundColor ,
-        flexDirection: 'row',
-        minHeight:  120,
-        alignItems: 'center',
+        flexDirection: "row",
+        minHeight: 120,
+        alignItems: "center",
+        top: 10,
+        position: "absolute",
+        left: 16,
+        width: Dimensions.get("window").width - 32,
+        backgroundColor: props.backgroundColor,
+        borderRadius: 14,
     },
 
     maneuverViewArrow: {

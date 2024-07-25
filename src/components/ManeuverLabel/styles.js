@@ -40,7 +40,7 @@ export default props => StyleSheet.create({
         fontFamily: props.fontFamily,
         fontSize: props.fontSize * 0.8,
         flexWrap: 'wrap',
-        color: '#387bc1',
+        color: '#ffffff',
         marginTop: 4,
     },
 
