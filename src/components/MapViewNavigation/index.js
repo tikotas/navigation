@@ -1,10 +1,10 @@
 /**
  * @imports
  */
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { CoordinatePropType } from '../../constants/PropTypes';
-import { View, TouchableOpacity, Text, Dimensions } from 'react-native';
+import {CoordinatePropType} from '../../constants/PropTypes';
+import {View, TouchableOpacity, Text, Dimensions} from 'react-native';
 import geolocation from '@react-native-community/geolocation';
 import connectTheme from '../../themes';
 import Geocoder from '../../modules/Geocoder';
@@ -17,10 +17,11 @@ import Traps from '../../modules/Traps';
 import RouteMarker from '../RouteMarker';
 import RoutePolyline from '../RoutePolyline';
 import PositionMarker from '../PositionMarker';
-import { POSITION_ARROW } from "../../constants/MarkerTypes";
-import { Circle, Polygon, Polyline } from 'react-native-maps';
+import {POSITION_ARROW} from "../../constants/MarkerTypes";
+import {Circle, Polygon, Polyline} from 'react-native-maps';
 
 const CONSTANT_VALUE = 20
+const {width, height} = Dimensions.get("window")
 
 /**
  * @component
@@ -57,7 +58,6 @@ export default class MapViewNavigation extends Component {
         simulate: PropTypes.bool,
         options: PropTypes.object,
         onPositionChanged: PropTypes.func,
-        dimensionWidth: PropTypes.number.isRequired,
     }
 
     /**
@@ -90,7 +90,6 @@ export default class MapViewNavigation extends Component {
         simulate: false,
         onPositionChanged: undefined,
         options: {},
-        dimensionWidth: undefined
     }
 
     /**
@@ -109,7 +108,6 @@ export default class MapViewNavigation extends Component {
         });
 
 
-
         this.traps = new Traps(this);
 
         this.state = {
@@ -123,8 +121,6 @@ export default class MapViewNavigation extends Component {
 
         this.theme = connectTheme(this.props.theme);
 
-        const { width, height } = Dimensions.get('window');
-
         this.aspectRatio = width / height;
     }
 
@@ -132,11 +128,25 @@ export default class MapViewNavigation extends Component {
      * @componentDidMount
      */
     componentDidMount() {
-        this.watchId = geolocation.watchPosition(position => {
+        // this.watchId = geolocation.watchPosition(position => {
+        //
+        //     this.setPosition(position.coords);
+        //
+        // });
 
-            this.setPosition(position.coords);
+        if (!this.props.simulate) {
+            this.watchId = geolocation.watchPosition(position => {
+                    console.log(position.coords, "<<<--->>> PACKAGE POSITION COORDS <<<--->>>")
+                    this.setPosition(position.coords);
+                },
+                (err) => {console.error(err)},
+                { enableHighAccuracy: true, timeout: 10, maximumAge: 0, distanceFilter: 0 });
 
-        });
+        } else {
+            this.watchId = geolocation.watchPosition(position => {
+                this.setPosition(position.coords);
+            });
+        }
     }
 
     /**
@@ -215,6 +225,7 @@ export default class MapViewNavigation extends Component {
      * @param coordinate
      * @param duration
      */
+
     /*updatePosition(coordinate, duration = 0) {
         this.props.map().animateToCoordinate(coordinate, duration);
     }*/
@@ -235,7 +246,7 @@ export default class MapViewNavigation extends Component {
             pitch: 80,
             altitude: 5
         }
-        this.props.map().animateCamera(newCamera, { duration: duration || this.props.animationDuration });
+        this.props.map().animateCamera(newCamera, {duration: duration || this.props.animationDuration});
         //this.props.map().animateToBearing(bearing, duration || this.props.animationDuration);
     }
 
@@ -281,9 +292,9 @@ export default class MapViewNavigation extends Component {
      * @param position
      */
     setPosition(position) {
-        const { latitude, longitude, heading } = position;
+        const {latitude, longitude, heading} = position;
 
-        position.coordinate = { latitude, longitude };
+        position.coordinate = {latitude, longitude};
 
         // process traps on setPosition
         this.traps.execute(position);
@@ -295,11 +306,11 @@ export default class MapViewNavigation extends Component {
 
             this.updateBearing(heading, longitude, latitude);
             if (this.props.onPositionChanged) {
-                this.props.onPositionChanged({ longitude: longitude, latitude: latitude })
+                this.props.onPositionChanged({longitude: longitude, latitude: latitude})
             }
         }
 
-        this.setState({ position });
+        this.setState({position});
     }
 
     /**
@@ -307,7 +318,7 @@ export default class MapViewNavigation extends Component {
      * @void
      */
     clearRoute() {
-        this.setState({ route: false, step: false, stepIndex: false })
+        this.setState({route: false, step: false, stepIndex: false})
     }
 
     /**
@@ -346,7 +357,7 @@ export default class MapViewNavigation extends Component {
         if (testForRoute && this.state.route) {
             return Promise.resolve(this.state.route);
         }
-        options = Object.assign({}, { mode: this.state.travelMode }, { mode: this.props.travelMode }, options.constructor == Object ? options : {});
+        options = Object.assign({}, {mode: this.state.travelMode}, {mode: this.props.travelMode}, options.constructor == Object ? options : {});
 
         return this.directionsCoder.fetch(origin, destination, options).then(routes => {
 
@@ -358,7 +369,7 @@ export default class MapViewNavigation extends Component {
 
                 this.props.onStepChange && this.props.onStepChange(false);
 
-                this.setState({ route, step: false });
+                this.setState({route, step: false});
 
                 return Promise.resolve(route);
             }
@@ -384,15 +395,15 @@ export default class MapViewNavigation extends Component {
             // }
             //
             // this.props.map().animateToRegion(region, this.props.animationDuration);
+
             console.log(this.props.map(), "MAP PROPS!!!!")
             console.log(route, "ROUTE-----")
-            console.log(this.props.dimensionWidth, "dimensionWidth-----")
             this.props.map().fitToCoordinates(route.totalCoordinates, {
                 edgePadding: {
-                    right: this.props.dimensionWidth / CONSTANT_VALUE,
-                    top: this.props.dimensionWidth / CONSTANT_VALUE,
-                    left: this.props.dimensionWidth / CONSTANT_VALUE,
-                    bottom: this.props.dimensionWidth / CONSTANT_VALUE,
+                    right: width / CONSTANT_VALUE,
+                    top: width / CONSTANT_VALUE,
+                    left: width / CONSTANT_VALUE,
+                    bottom: width / CONSTANT_VALUE,
                 },
             })
 
@@ -526,16 +537,17 @@ export default class MapViewNavigation extends Component {
             const coordinate = step.start;
 
             [
-                { radius: this.props.routeStepDistance, color: 'blue' },
-                { radius: this.props.routeStepDistance * this.props.routeStepInnerTolerance, color: 'red' },
-                { radius: this.props.routeStepDistance * this.props.routeStepCenterTolerance, color: 'green' }
+                {radius: this.props.routeStepDistance, color: 'blue'},
+                {radius: this.props.routeStepDistance * this.props.routeStepInnerTolerance, color: 'red'},
+                {radius: this.props.routeStepDistance * this.props.routeStepCenterTolerance, color: 'green'}
             ].forEach(d => {
-                result.push(<Circle key={c} strokeColor={d.color} strokeWidth={2} center={step.start} radius={d.radius} />);
+                result.push(<Circle key={c} strokeColor={d.color} strokeWidth={2} center={step.start}
+                                    radius={d.radius}/>);
                 c++;
             });
 
             [
-                { radius: this.props.routeStepDistance, color: 'blue' }
+                {radius: this.props.routeStepDistance, color: 'blue'}
             ].forEach(d => {
 
                 let bearing = step.bearing; // - 180 > 0 ? step.bearing - 180 : 360 - step.bearing - 180;
@@ -547,10 +559,9 @@ export default class MapViewNavigation extends Component {
                     this.props.routeStepDistance
                 )
 
-                result.push(<Polyline key={c} strokeColor={d.color} strokeWidth={8} coordinates={coords} />);
+                result.push(<Polyline key={c} strokeColor={d.color} strokeWidth={8} coordinates={coords}/>);
                 c++;
             })
-
 
 
         });
@@ -558,7 +569,6 @@ export default class MapViewNavigation extends Component {
 
         return result;
     }
-
 
 
     /**

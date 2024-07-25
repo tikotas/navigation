@@ -1,6 +1,6 @@
 {
   "name": "map-navigation-v",
-  "version": "0.0.25",
+  "version": "0.0.30",
   "description": "A helper and component library for react-native-maps that enables navigation support",
   "main": "index.js",
   "repository": {
@@ -38,7 +38,8 @@
     "@react-native-community/geolocation": "^3.0.4",
     "geolib": "^3.0.2",
     "prop-types": "^15.6.2",
-    "react-native-optiongroup": "^0.0.7"
+    "react-native-optiongroup": "^0.0.7",
+    "react-native-tts": "^4.1.1"
   },
   "rnpm": {
     "assets": [

@@ -8,6 +8,7 @@ import Styles from './styles';
 import ManeuverArrow from '../ManeuverArrow';
 import ManeuverLabel from '../ManeuverLabel';
 import CloseButton from "../CloseButton";
+import Tts from "react-native-tts"
 
 
 /**
@@ -40,10 +41,10 @@ export default class ManeuverView extends Component {
         step: undefined,
         fontFamily: undefined,
         fontFamilyBold: undefined,
-        backgroundColor:  '#f7f7f4',
+        backgroundColor:  '#00654f',
         fontSize: 20,
         arrowSize: 50,
-        arrowColor: '#545455',
+        arrowColor: '#ffffff',
         withCloseButton: false,
         onClose: undefined,
         onPress: undefined,
@@ -59,6 +60,31 @@ export default class ManeuverView extends Component {
         super(props);
 
     }
+
+    componentDidMount() {
+        if (!this.props.step) return
+        this.callVoice()
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.step?.instructions !== this.props.step?.instructions) {
+            this.callVoice()
+        }
+    }
+
+    callVoice() {
+        Tts.speak(this.removeHtmlTags(this.props.step?.instructions), {
+            iosVoiceId: "com.apple.ttsbundle.Moira-compact",
+            rate: 0.5,
+            androidParams: {
+                KEY_PARAM_PAN: -1,
+                KEY_PARAM_VOLUME: 0.5,
+                KEY_PARAM_STREAM: "STREAM_MUSIC",
+            },
+        })
+    }
+
+    removeHtmlTags = (text) => text.replace(/<[^>]*>/g, "")
 
 
     /**
