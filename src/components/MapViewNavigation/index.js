@@ -127,6 +127,28 @@ export default class MapViewNavigation extends Component {
     /**
      * @componentDidMount
      */
+    // componentDidMount() {
+    //     // this.watchId = geolocation.watchPosition(position => {
+    //     //
+    //     //     this.setPosition(position.coords);
+    //     //
+    //     // });
+    //
+    //     if (!this.props.simulate) {
+    //         this.watchId = geolocation.watchPosition(position => {
+    //                 console.log(position.coords, "<<<--->>> PACKAGE POSITION COORDS <<<--->>>")
+    //                 this.setPosition(position.coords);
+    //             },
+    //             (err) => {console.error(err)},
+    //             { enableHighAccuracy: true, timeout: 10, maximumAge: 0, distanceFilter: 0 });
+    //
+    //     } else {
+    //         this.watchId = geolocation.watchPosition(position => {
+    //             this.setPosition(position.coords);
+    //         });
+    //     }
+    // }
+
     componentDidMount() {
         // this.watchId = geolocation.watchPosition(position => {
         //
@@ -137,15 +159,26 @@ export default class MapViewNavigation extends Component {
         if (!this.props.simulate) {
             this.watchId = geolocation.watchPosition(position => {
                     console.log(position.coords, "<<<--->>> PACKAGE POSITION COORDS <<<--->>>")
-                    this.setPosition(position.coords);
+                    this.getRoadCoordinates({
+                        positionCoords: position.coords,
+                        key: this.props.apiKey,
+                    })
+                    // this.setPosition(position.coords)
                 },
-                (err) => {console.error(err)},
-                { enableHighAccuracy: true, timeout: 10, maximumAge: 0, distanceFilter: 0 });
+                (err) => {
+                    console.error(err)
+                },
+                {enableHighAccuracy: true, timeout: 10, maximumAge: 0, distanceFilter: 0})
 
         } else {
             this.watchId = geolocation.watchPosition(position => {
-                this.setPosition(position.coords);
-            });
+                console.log(position.coords, "<<<--->>> PACKAGE SIMULATOR POSITION COORDS <<<--->>>")
+                this.getRoadCoordinates({
+                    positionCoords: position.coords,
+                    key: this.props.apiKey,
+                })
+                // this.setPosition(position.coords)
+            })
         }
     }
 
@@ -171,6 +204,32 @@ export default class MapViewNavigation extends Component {
             ) {
                 this.updateRoute();
             }
+        }
+    }
+
+    async getRoadCoordinates({positionCoords, key}) {
+        const snappedURL = `https://roads.googleapis.com/v1/snapToRoads?path=${positionCoords.latitude},${positionCoords.longitude}&key=${key}`
+        try {
+            // this is for always keeping the user on the road!!!!
+            const data = await fetch(snappedURL)
+            const coordinates = await data.json()
+            if (!coordinates) return
+
+            console.log(positionCoords, "<<< REAL POSITION COORDINATES >>>")
+            console.log(coordinates.snappedPoints[0].location, "<<< SNAPPED POSITION COORDINATES >>>")
+            const newPositionCoords = {
+                ...positionCoords,
+                coordinate: {
+                    latitude: coordinates.snappedPoints[0].location.latitude,
+                    longitude: coordinates.snappedPoints[0].location.longitude,
+                },
+                latitude: coordinates.snappedPoints[0].location.latitude,
+                longitude: coordinates.snappedPoints[0].location.longitude,
+            }
+            console.log(newPositionCoords, "<<< NEW POSITION COORDINATES >>>")
+            this.setPosition(newPositionCoords)
+        } catch (err) {
+            console.log(err, "<<< ERROR WHILE FETCHING SNAP TO ROAD COORDINATES >>>")
         }
     }
 
