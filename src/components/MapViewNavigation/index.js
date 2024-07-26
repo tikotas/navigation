@@ -1,24 +1,24 @@
 /**
  * @imports
  */
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import {CoordinatePropType} from '../../constants/PropTypes';
-import {View, TouchableOpacity, Text, Dimensions} from 'react-native';
-import geolocation from '@react-native-community/geolocation';
-import connectTheme from '../../themes';
-import Geocoder from '../../modules/Geocoder';
-import Directions from '../../modules/Directions';
-import TravelModes from '../../constants/TravelModes';
-import NavigationModes from '../../constants/NavigationModes';
-import * as Tools from '../../modules/Tools';
-import Simulator from '../../modules/Simulator';
-import Traps from '../../modules/Traps';
-import RouteMarker from '../RouteMarker';
-import RoutePolyline from '../RoutePolyline';
-import PositionMarker from '../PositionMarker';
-import {POSITION_ARROW} from "../../constants/MarkerTypes";
-import {Circle, Polygon, Polyline} from 'react-native-maps';
+import React, {Component} from "react"
+import PropTypes from "prop-types"
+import {CoordinatePropType} from "../../constants/PropTypes"
+import {View, TouchableOpacity, Text, Dimensions} from "react-native"
+import geolocation from "@react-native-community/geolocation"
+import connectTheme from "../../themes"
+import Geocoder from "../../modules/Geocoder"
+import Directions from "../../modules/Directions"
+import TravelModes from "../../constants/TravelModes"
+import NavigationModes from "../../constants/NavigationModes"
+import * as Tools from "../../modules/Tools"
+import Simulator from "../../modules/Simulator"
+import Traps from "../../modules/Traps"
+import RouteMarker from "../RouteMarker"
+import RoutePolyline from "../RoutePolyline"
+import PositionMarker from "../PositionMarker"
+import {POSITION_ARROW} from "../../constants/MarkerTypes"
+import {Circle, Polygon, Polyline} from "react-native-maps"
 
 const CONSTANT_VALUE = 20
 const {width, height} = Dimensions.get("window")
@@ -97,18 +97,18 @@ export default class MapViewNavigation extends Component {
      * @param props
      */
     constructor(props) {
-        super(props);
+        super(props)
 
         this.geoCoder = new Geocoder(this.props.apiKey, {
-            language: this.props.language
-        });
+            language: this.props.language,
+        })
 
         this.directionsCoder = new Directions(this.props.apiKey, {
-            language: this.props.language
-        });
+            language: this.props.language,
+        })
 
 
-        this.traps = new Traps(this);
+        this.traps = new Traps(this)
 
         this.state = {
             route: false,
@@ -117,45 +117,14 @@ export default class MapViewNavigation extends Component {
             navigationMode: NavigationModes.IDLE,
             travelMode: TravelModes.DRIVING,
             stepIndex: false,
-        };
+        }
 
-        this.theme = connectTheme(this.props.theme);
+        this.theme = connectTheme(this.props.theme)
 
-        this.aspectRatio = width / height;
+        this.aspectRatio = width / height
     }
 
-    /**
-     * @componentDidMount
-     */
-    // componentDidMount() {
-    //     // this.watchId = geolocation.watchPosition(position => {
-    //     //
-    //     //     this.setPosition(position.coords);
-    //     //
-    //     // });
-    //
-    //     if (!this.props.simulate) {
-    //         this.watchId = geolocation.watchPosition(position => {
-    //                 console.log(position.coords, "<<<--->>> PACKAGE POSITION COORDS <<<--->>>")
-    //                 this.setPosition(position.coords);
-    //             },
-    //             (err) => {console.error(err)},
-    //             { enableHighAccuracy: true, timeout: 10, maximumAge: 0, distanceFilter: 0 });
-    //
-    //     } else {
-    //         this.watchId = geolocation.watchPosition(position => {
-    //             this.setPosition(position.coords);
-    //         });
-    //     }
-    // }
-
     componentDidMount() {
-        // this.watchId = geolocation.watchPosition(position => {
-        //
-        //     this.setPosition(position.coords);
-        //
-        // });
-
         if (!this.props.simulate) {
             this.watchId = geolocation.watchPosition(position => {
                     console.log(position.coords, "<<<--->>> PACKAGE POSITION COORDS <<<--->>>")
@@ -163,7 +132,6 @@ export default class MapViewNavigation extends Component {
                         positionCoords: position.coords,
                         key: this.props.apiKey,
                     })
-                    // this.setPosition(position.coords)
                 },
                 (err) => {
                     console.error(err)
@@ -177,7 +145,6 @@ export default class MapViewNavigation extends Component {
                     positionCoords: position.coords,
                     key: this.props.apiKey,
                 })
-                // this.setPosition(position.coords)
             })
         }
     }
@@ -186,7 +153,7 @@ export default class MapViewNavigation extends Component {
      * @componentWillUnmount
      */
     componentWillUnmount() {
-        geolocation.clearWatch(this.watchId);
+        geolocation.clearWatch(this.watchId)
     }
 
     /**
@@ -202,7 +169,7 @@ export default class MapViewNavigation extends Component {
                 (prevProps.travelMode != this.props.travelMode) ||
                 (prevProps.origin != this.props.origin || prevProps.destination != this.props.destination)
             ) {
-                this.updateRoute();
+                this.updateRoute()
             }
         }
     }
@@ -215,8 +182,6 @@ export default class MapViewNavigation extends Component {
             const coordinates = await data.json()
             if (!coordinates) return
 
-            console.log(positionCoords, "<<< REAL POSITION COORDINATES >>>")
-            console.log(coordinates.snappedPoints[0].location, "<<< SNAPPED POSITION COORDINATES >>>")
             const newPositionCoords = {
                 ...positionCoords,
                 coordinate: {
@@ -226,7 +191,6 @@ export default class MapViewNavigation extends Component {
                 latitude: coordinates.snappedPoints[0].location.latitude,
                 longitude: coordinates.snappedPoints[0].location.longitude,
             }
-            console.log(newPositionCoords, "<<< NEW POSITION COORDINATES >>>")
             this.setPosition(newPositionCoords)
         } catch (err) {
             console.log(err, "<<< ERROR WHILE FETCHING SNAP TO ROAD COORDINATES >>>")
@@ -242,10 +206,10 @@ export default class MapViewNavigation extends Component {
     getCoordinates(address, raw = false) {
         return this.geoCoder.getFromLocation(address).then(results => {
 
-            let coordinates = raw ? results : this.geoCoder.minimizeResults(results);
+            let coordinates = raw ? results : this.geoCoder.minimizeResults(results)
 
-            return coordinates.length == 1 ? coordinates[0] : coordinates;
-        });
+            return coordinates.length == 1 ? coordinates[0] : coordinates
+        })
     }
 
     /**
@@ -253,11 +217,11 @@ export default class MapViewNavigation extends Component {
      * @param level
      */
     getZoomValue(level) {
-        const value = 0.00001 * (this.props.maxZoom - (level < this.props.minZoom ? this.props.minZoom : level));
+        const value = 0.00001 * (this.props.maxZoom - (level < this.props.minZoom ? this.props.minZoom : level))
 
         return {
             latitudeDelta: value,
-            longitudeDelta: value * this.aspectRatio
+            longitudeDelta: value * this.aspectRatio,
         }
     }
 
@@ -269,25 +233,15 @@ export default class MapViewNavigation extends Component {
      */
     getBoundingBoxZoomValue(b, quantifier = 1) {
 
-        if (b.length != 2) return {};
+        if (b.length != 2) return {}
 
-        const latitudeDelta = (b[0].latitude > b[1].latitude ? b[0].latitude - b[1].latitude : b[1].latitude - b[0].latitude) * quantifier;
+        const latitudeDelta = (b[0].latitude > b[1].latitude ? b[0].latitude - b[1].latitude : b[1].latitude - b[0].latitude) * quantifier
 
         return {
             latitudeDelta,
             longitudeDelta: latitudeDelta * this.aspectRatio,
-        };
+        }
     }
-
-    /**
-     * updatePosition
-     * @param coordinate
-     * @param duration
-     */
-
-    /*updatePosition(coordinate, duration = 0) {
-        this.props.map().animateToCoordinate(coordinate, duration);
-    }*/
 
     /**
      * updateBearing
@@ -298,15 +252,14 @@ export default class MapViewNavigation extends Component {
         const newCamera = {
             center: {
                 latitude: lat,
-                longitude: lon
+                longitude: lon,
             },
             zoom: 30,
             heading: bearing,
             pitch: 80,
-            altitude: 5
+            altitude: 5,
         }
-        this.props.map().animateCamera(newCamera, {duration: duration || this.props.animationDuration});
-        //this.props.map().animateToBearing(bearing, duration || this.props.animationDuration);
+        this.props.map().animateCamera(newCamera, {duration: duration || this.props.animationDuration})
     }
 
     /**
@@ -314,11 +267,11 @@ export default class MapViewNavigation extends Component {
      * @param stepIndex
      */
     updateStep(stepIndex = 0) {
-        const step = this.state.route.steps[stepIndex < 0 ? 0 : stepIndex];
+        const step = this.state.route.steps[stepIndex < 0 ? 0 : stepIndex]
 
-        const nextStep = this.state.route.steps[stepIndex + 1];
+        const nextStep = this.state.route.steps[stepIndex + 1]
 
-        this.props.onStepChange && this.props.onStepChange(step, nextStep);
+        this.props.onStepChange && this.props.onStepChange(step, nextStep)
 
         this.traps.watchStep(step, nextStep, {
             distance: this.props.routeStepDistance,
@@ -330,20 +283,20 @@ export default class MapViewNavigation extends Component {
             if (!nextStep && trap.isCenter()) {
 
                 this.props.onNavigationCompleted && this.props.onNavigationCompleted()
-                this.clearRoute();
+                this.clearRoute()
 
                 return this.setState({
                     navigationMode: NavigationModes.IDLE,
-                    stepIndex: false
-                });
+                    stepIndex: false,
+                })
             }
 
             if (trap.isLeaving()) {
-                this.updateStep(this.stepIndex);
+                this.updateStep(this.stepIndex)
             }
-        });
+        })
 
-        this.stepIndex = stepIndex + 1; // ensures that this is a real number
+        this.stepIndex = stepIndex + 1 // ensures that this is a real number
     }
 
     /**
@@ -351,25 +304,23 @@ export default class MapViewNavigation extends Component {
      * @param position
      */
     setPosition(position) {
-        const {latitude, longitude, heading} = position;
+        const {latitude, longitude, heading} = position
 
-        position.coordinate = {latitude, longitude};
+        position.coordinate = {latitude, longitude}
 
         // process traps on setPosition
-        this.traps.execute(position);
+        this.traps.execute(position)
 
         // update position on map
         if (this.state.navigationMode == NavigationModes.NAVIGATION) {
 
-            //this.updatePosition(position);
-
-            this.updateBearing(heading, longitude, latitude);
+            this.updateBearing(heading, longitude, latitude)
             if (this.props.onPositionChanged) {
                 this.props.onPositionChanged({longitude: longitude, latitude: latitude})
             }
         }
 
-        this.setState({position});
+        this.setState({position})
     }
 
     /**
@@ -387,20 +338,20 @@ export default class MapViewNavigation extends Component {
      * @param navigationMode
      */
     updateRoute(origin = false, destination = false, navigationMode = false, options = null) {
-        origin = origin || this.props.origin;
-        destination = destination || this.props.destination;
-        navigationMode = navigationMode || this.props.navigationMode;
+        origin = origin || this.props.origin
+        destination = destination || this.props.destination
+        navigationMode = navigationMode || this.props.navigationMode
         options = options || this.props.options
 
         switch (navigationMode) {
 
             case NavigationModes.ROUTE:
-                this.displayRoute(origin, destination, options);
-                break;
+                this.displayRoute(origin, destination, options)
+                break
 
             case NavigationModes.NAVIGATION:
-                this.navigateRoute(origin, destination, options);
-                break;
+                this.navigateRoute(origin, destination, options)
+                break
         }
     }
 
@@ -414,28 +365,28 @@ export default class MapViewNavigation extends Component {
      */
     prepareRoute(origin, destination, options = false, testForRoute = false) {
         if (testForRoute && this.state.route) {
-            return Promise.resolve(this.state.route);
+            return Promise.resolve(this.state.route)
         }
-        options = Object.assign({}, {mode: this.state.travelMode}, {mode: this.props.travelMode}, options.constructor == Object ? options : {});
+        options = Object.assign({}, {mode: this.state.travelMode}, {mode: this.props.travelMode}, options.constructor == Object ? options : {})
 
         return this.directionsCoder.fetch(origin, destination, options).then(routes => {
 
             if (routes.length) {
 
-                const route = routes[0];
+                const route = routes[0]
 
-                this.props.onRouteChange && this.props.onRouteChange(route);
+                this.props.onRouteChange && this.props.onRouteChange(route)
 
-                this.props.onStepChange && this.props.onStepChange(false);
+                this.props.onStepChange && this.props.onStepChange(false)
 
-                this.setState({route, step: false});
+                this.setState({route, step: false})
 
-                return Promise.resolve(route);
+                return Promise.resolve(route)
             }
 
-            return Promise.reject();
+            return Promise.reject()
 
-        });
+        })
     }
 
     /**
@@ -447,16 +398,6 @@ export default class MapViewNavigation extends Component {
      */
     displayRoute(origin, destination, options = false) {
         return this.prepareRoute(origin, destination, options).then(route => {
-
-            // const region = {
-            //     ...route.bounds.center,
-            //     ...this.getBoundingBoxZoomValue(route.bounds.boundingBox, this.props.directionZoomQuantifier)
-            // }
-            //
-            // this.props.map().animateToRegion(region, this.props.animationDuration);
-
-            console.log(this.props.map(), "MAP PROPS!!!!")
-            console.log(route, "ROUTE-----")
             this.props.map().fitToCoordinates(route.totalCoordinates, {
                 edgePadding: {
                     right: width / CONSTANT_VALUE,
@@ -469,11 +410,11 @@ export default class MapViewNavigation extends Component {
             if (!this.state.navigationMode == NavigationModes.ROUTE) {
                 this.setState({
                     navigationMode: NavigationModes.ROUTE,
-                });
+                })
             }
 
-            return Promise.resolve(route);
-        }).catch((err) => console.log(err));
+            return Promise.resolve(route)
+        }).catch((err) => console.log(err))
     }
 
     /**
@@ -489,32 +430,30 @@ export default class MapViewNavigation extends Component {
             const region = {
                 ...route.origin.coordinate,
                 ...this.getZoomValue(this.props.navigationZoomLevel),
-            };
+            }
 
-            this.props.map().animateToRegion(region, this.props.animationDuration);
-            // this.props.map().animateToViewingAngle(this.props.navigationViewingAngle, this.props.animationDuration);
+            this.props.map().animateToRegion(region, this.props.animationDuration)
 
-            //this.updatePosition(route.origin.coordinate);
-            this.updateBearing(route.initialBearing);
+            this.updateBearing(route.initialBearing)
 
             this.setState({
                 navigationMode: NavigationModes.NAVIGATION,
-            });
+            })
 
-            this.updateStep(0);
+            this.updateStep(0)
 
-            this.props.onNavigationStarted && this.props.onNavigationStarted();
+            this.props.onNavigationStarted && this.props.onNavigationStarted()
 
             if (this.props.simulate) {
                 console.log("SIMULATING ROUTE")
-                this.simulator = new Simulator(this);
-                setTimeout(() => this.simulator.start(route), this.props.animationDuration * 1.5);
+                this.simulator = new Simulator(this)
+                setTimeout(() => this.simulator.start(route), this.props.animationDuration * 1.5)
             } else {
                 console.log("NOT SIMULATING")
             }
 
-            return Promise.resolve(route);
-        });
+            return Promise.resolve(route)
+        })
     }
 
     /**
@@ -523,7 +462,7 @@ export default class MapViewNavigation extends Component {
      * @returns {*}
      */
     getRouteMarkers(route) {
-        if (!route || route.markers.constructor !== Array) return null;
+        if (!route || route.markers.constructor !== Array) return null
 
         return route.markers.map((params, index) => {
 
@@ -533,8 +472,8 @@ export default class MapViewNavigation extends Component {
                     theme={this.props.theme}
                     {...params}
                 />
-            );
-        });
+            )
+        })
     }
 
     /**
@@ -544,11 +483,11 @@ export default class MapViewNavigation extends Component {
      * @returns {*}
      */
     getPositionMarker(position, navigationMode) {
-        const type = navigationMode == NavigationModes.NAVIGATION ? POSITION_ARROW : undefined;
+        const type = navigationMode == NavigationModes.NAVIGATION ? POSITION_ARROW : undefined
 
         return (
             <PositionMarker
-                key={'position'}
+                key={"position"}
                 theme={this.props.theme}
                 type={type}
                 {...position}
@@ -562,7 +501,7 @@ export default class MapViewNavigation extends Component {
      * @returns {*}
      */
     getRoutePolylines(route) {
-        if (!route || route.polylines.constructor !== Array) return null;
+        if (!route || route.polylines.constructor !== Array) return null
 
         return route.polylines.map((params, index) => {
 
@@ -572,8 +511,8 @@ export default class MapViewNavigation extends Component {
                     theme={this.props.theme}
                     {...params}
                 />
-            ) : null;
-        });
+            ) : null
+        })
     }
 
     /**
@@ -582,51 +521,51 @@ export default class MapViewNavigation extends Component {
      * @returns {Array}
      */
     getDebugShapes(route) {
-        let result = [];
+        let result = []
 
-        if (!route || !this.props.displayDebugMarkers) return result;
+        if (!route || !this.props.displayDebugMarkers) return result
 
 
-        const steps = this.state.route.steps;
+        const steps = this.state.route.steps
 
-        let c = 0;
+        let c = 0
 
         steps.forEach((step, index) => {
 
             const coordinate = step.start;
 
             [
-                {radius: this.props.routeStepDistance, color: 'blue'},
-                {radius: this.props.routeStepDistance * this.props.routeStepInnerTolerance, color: 'red'},
-                {radius: this.props.routeStepDistance * this.props.routeStepCenterTolerance, color: 'green'}
+                {radius: this.props.routeStepDistance, color: "blue"},
+                {radius: this.props.routeStepDistance * this.props.routeStepInnerTolerance, color: "red"},
+                {radius: this.props.routeStepDistance * this.props.routeStepCenterTolerance, color: "green"},
             ].forEach(d => {
                 result.push(<Circle key={c} strokeColor={d.color} strokeWidth={2} center={step.start}
-                                    radius={d.radius}/>);
-                c++;
+                                    radius={d.radius}/>)
+                c++
             });
 
             [
-                {radius: this.props.routeStepDistance, color: 'blue'}
+                {radius: this.props.routeStepDistance, color: "blue"},
             ].forEach(d => {
 
-                let bearing = step.bearing; // - 180 > 0 ? step.bearing - 180 : 360 - step.bearing - 180;
+                let bearing = step.bearing // - 180 > 0 ? step.bearing - 180 : 360 - step.bearing - 180;
 
                 let coords = Tools.toArcPolygon(
                     coordinate,
                     bearing - this.props.routeStepCourseTolerance,
                     bearing + this.props.routeStepCourseTolerance,
-                    this.props.routeStepDistance
+                    this.props.routeStepDistance,
                 )
 
-                result.push(<Polyline key={c} strokeColor={d.color} strokeWidth={8} coordinates={coords}/>);
-                c++;
+                result.push(<Polyline key={c} strokeColor={d.color} strokeWidth={8} coordinates={coords}/>)
+                c++
             })
 
 
-        });
+        })
 
 
-        return result;
+        return result
     }
 
 
@@ -639,9 +578,9 @@ export default class MapViewNavigation extends Component {
             this.getRouteMarkers(this.state.route),
             this.getRoutePolylines(this.state.route),
             this.getPositionMarker(this.state.position, this.state.navigationMode),
-            this.getDebugShapes(this.state.route)
-        ];
+            this.getDebugShapes(this.state.route),
+        ]
 
-        return result;
+        return result
     }
 }
