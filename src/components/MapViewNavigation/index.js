@@ -48,6 +48,9 @@ export default class MapViewNavigation extends Component {
         directionZoomQuantifier: PropTypes.number,
         onRouteChange: PropTypes.func,
         onStepChange: PropTypes.func,
+        onStart: PropTypes.func,
+        onReady: PropTypes.func,
+        onError: PropTypes.func,
         onNavigationStarted: PropTypes.func,
         onNavigationCompleted: PropTypes.func,
         routeStepDistance: PropTypes.number,
@@ -80,6 +83,9 @@ export default class MapViewNavigation extends Component {
         directionZoomQuantifier: 1.5,
         onRouteChange: undefined,
         onStepChange: undefined,
+        onStart: undefined,
+        onReady: undefined,
+        onError: undefined,
         onNavigationStarted: undefined,
         onNavigationCompleted: undefined,
         routeStepDistance: 15,
@@ -397,6 +403,7 @@ export default class MapViewNavigation extends Component {
      * @returns {PromiseLike<T> | Promise<T>}
      */
     displayRoute(origin, destination, options = false) {
+        this.props.onStart("Start the route")
         return this.prepareRoute(origin, destination, options).then(route => {
             this.props.map().fitToCoordinates(route.totalCoordinates, {
                 edgePadding: {
@@ -413,8 +420,13 @@ export default class MapViewNavigation extends Component {
                 })
             }
 
+            this.props.onReady(route)
+
             return Promise.resolve(route)
-        }).catch((err) => console.log(err))
+        }).catch((err) => {
+            this.props.onError(err)
+            console.log(err)
+        })
     }
 
     /**
