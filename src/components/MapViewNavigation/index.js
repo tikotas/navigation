@@ -123,6 +123,7 @@ export default class MapViewNavigation extends Component {
             navigationMode: NavigationModes.IDLE,
             travelMode: TravelModes.DRIVING,
             stepIndex: false,
+            startTracking: true,
         }
 
         this.theme = connectTheme(this.props.theme)
@@ -131,6 +132,7 @@ export default class MapViewNavigation extends Component {
     }
 
     componentDidMount() {
+        if (!this.state.startTracking) return
         if (!this.props.simulate) {
             this.watchId = geolocation.watchPosition(position => {
                     console.log(position.coords, "<<<--->>> PACKAGE POSITION COORDS <<<--->>>")
@@ -289,6 +291,7 @@ export default class MapViewNavigation extends Component {
             if (!nextStep && trap.isCenter()) {
 
                 this.props.onNavigationCompleted && this.props.onNavigationCompleted()
+                this.setState({startTracking: false})
                 this.clearRoute()
 
                 return this.setState({
@@ -455,6 +458,7 @@ export default class MapViewNavigation extends Component {
             this.updateStep(0)
 
             this.props.onNavigationStarted && this.props.onNavigationStarted()
+            this.setState({startTracking: true})
 
             if (this.props.simulate) {
                 console.log("SIMULATING ROUTE")

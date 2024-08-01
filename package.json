@@ -1,6 +1,6 @@
 {
   "name": "map-navigation-v",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "description": "A helper and component library for react-native-maps that enables navigation support",
   "main": "index.js",
   "repository": {
