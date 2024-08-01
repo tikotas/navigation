@@ -19,6 +19,10 @@ export default class DirectionsListView extends Component {
     static propTypes = {
         route: PropTypes.any.isRequired,
         fontFamily: PropTypes.string,
+        backgroundColor: PropTypes.string,
+        color: PropTypes.string,
+        detailColor: PropTypes.string,
+        extraColor: PropTypes.string,
         fontFamilyBold: PropTypes.string,
         showOriginDestinationHeader: PropTypes.bool,
         displayTravelMode: PropTypes.bool,
@@ -31,6 +35,10 @@ export default class DirectionsListView extends Component {
     static defaultProps = {
         route: undefined,
         fontFamily: undefined,
+        backgroundColor: undefined,
+        color: undefined,
+        detailColor: undefined,
+        extraColor: undefined,
         fontFamilyBold: undefined,
         showOriginDestinationHeader: true,
         displayTravelMode: false,

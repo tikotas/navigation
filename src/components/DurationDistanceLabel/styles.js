@@ -17,6 +17,7 @@ export default props => StyleSheet.create({
         fontFamily: props.fontFamily,
         fontSize: props.fontSize * 0.8,
         opacity: props.opacity,
+        color: props.color,
         flexWrap: 'wrap',
     },
 
@@ -24,6 +25,7 @@ export default props => StyleSheet.create({
         ...NavigationIconsFont,
         fontSize: props.fontSize * 0.8,
         opacity: props.opacity,
+        color: props.color,
         marginRight: 8,
     },
 
