@@ -16,7 +16,7 @@ export default props => StyleSheet.create({
     directionDetailHeader: {
         padding: 25,
         paddingBottom: 10,
-        backgroundColor: '#f7f7f4',
+        backgroundColor: props.backgroundColor || '#f7f7f4',
         flexDirection: 'column'
     },
 
@@ -28,6 +28,7 @@ export default props => StyleSheet.create({
     directionDetailHeaderAddressText: {
         fontSize: 16,
         fontFamily: props.fontFamily,
+        color: props.color
     },
 
     directionDetailHeaderAddressLabel: {
@@ -35,6 +36,7 @@ export default props => StyleSheet.create({
         opacity: 0.7,
         fontWeight: 'bold',
         fontFamily: props.fontFamily,
+        color: props.color,
     },
 
     /**
@@ -47,13 +49,14 @@ export default props => StyleSheet.create({
     directionDetailTravelDuration: {
         fontSize: 32,
         fontFamily: props.fontFamily,
-        color: '#387bc1',
+        color: props.detailColor || "#387bc1",
     },
 
     directionDetailTravelDistance: {
         fontSize: 22,
         fontFamily: props.fontFamily,
-        opacity: 0.8
+        opacity: 0.8,
+        color: props.color,
     },
 
     /**
@@ -77,7 +80,7 @@ export default props => StyleSheet.create({
         fontFamily: props.fontFamily,
         fontSize: 13,
         flexWrap: 'wrap',
-        color: '#387bc1',
+        color: props.extraColor || "#387bc1",
     },
 
     durationDistance: {
@@ -98,7 +101,7 @@ export default props => StyleSheet.create({
     },
 
     directionDetailSection: {
-        borderColor: '#e6e6e6',
+        borderColor: props.borderColor || "#e6e6e6",
         borderTopWidth: 1,
         paddingTop: 20,
         marginBottom: 20,

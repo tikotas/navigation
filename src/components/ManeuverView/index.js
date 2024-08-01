@@ -1,9 +1,9 @@
 /**
  * @imports
  */
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { ScrollView, View, TouchableOpacity, Text } from 'react-native';
+import {View} from 'react-native';
 import Styles from './styles';
 import ManeuverArrow from '../ManeuverArrow';
 import ManeuverLabel from '../ManeuverLabel';
@@ -41,7 +41,7 @@ export default class ManeuverView extends Component {
         step: undefined,
         fontFamily: undefined,
         fontFamilyBold: undefined,
-        backgroundColor:  '#00654f',
+        backgroundColor: '#00654f',
         fontSize: 20,
         arrowSize: 50,
         arrowColor: '#ffffff',
@@ -55,8 +55,7 @@ export default class ManeuverView extends Component {
      * @constructor
      * @param props
      */
-    constructor(props)
-    {
+    constructor(props) {
         super(props);
 
     }
@@ -91,18 +90,17 @@ export default class ManeuverView extends Component {
      * render
      * @returns {XML}
      */
-    render()
-    {
+    render() {
         const styles = Styles(this.props);
 
         const step = this.props.step;
 
-        if(!step) return null;
+        if (!step) return null;
 
         const maneuver = step.maneuver;
 
         return (
-            <TouchableOpacity style={styles.maneuverView}>
+            <View style={styles.maneuverView}>
                 <View style={styles.maneuverViewArrow}>
                     <ManeuverArrow
                         size={this.props.arrowSize}
@@ -120,10 +118,10 @@ export default class ManeuverView extends Component {
                 </View>
                 {!this.props.withCloseButton ? null : (
                     <View style={styles.maneuverClose}>
-                        <CloseButton onPress={() => this.props.onClose && this.props.onClose()} />
+                        <CloseButton onPress={() => this.props.onClose && this.props.onClose()}/>
                     </View>
                 )}
-            </TouchableOpacity>
+            </View>
         );
     }
 }
