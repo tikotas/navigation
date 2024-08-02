@@ -287,6 +287,9 @@ export default class MapViewNavigation extends Component {
             centerRadiusTolerance: this.props.routeStepCenterTolerance,
             courseTolerance: this.props.routeStepCourseTolerance,
         }, (trap, event, state) => {
+            console.log("___________________ WATCH STEP _____ START ____________________________")
+            console.log({trap})
+            console.log("__________________________END__________________________")
 
             if (!nextStep && trap.isCenter()) {
 
@@ -351,6 +354,9 @@ export default class MapViewNavigation extends Component {
         destination = destination || this.props.destination
         navigationMode = navigationMode || this.props.navigationMode
         options = options || this.props.options
+        console.log("---------------- UPDATE ROUTE ----- START ---------------------------")
+        console.log({origin, destination, navigationMode, options})
+        console.log("-----------------------END-------------------------")
 
         switch (navigationMode) {
 

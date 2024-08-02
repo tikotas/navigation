@@ -161,11 +161,14 @@ export default class Directions {
     /**
      * parseStep
      * @param step
+     * @param nextStep
      */
     parseStep(step, nextStep) {
 
         const bearing = GeoLib.getGreatCircleBearing(toCoordinate(step.start_location), toCoordinate(nextStep ? nextStep.start_location : step.end_location));
-
+        console.log("------------------ BEARING IN DIRECTIONS --- START -------------------------")
+        console.log({bearing})
+        console.log("--------------------------- END -------------------------")
         return {
             compass: this.decodeCompass(bearing),
             maneuver: this.decodeManeuver(step, bearing),
