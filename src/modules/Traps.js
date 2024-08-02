@@ -57,8 +57,7 @@ export default class Traps {
      * getArray
      * @returns {any[]}
      */
-    getArray()
-    {
+    getArray() {
         return Object.keys(this.traps).map(id => this.traps[id]);
     }
 
@@ -68,6 +67,7 @@ export default class Traps {
      * @param coordinate
      * @param radius
      * @param options
+     * @param callback
      */
     watchRadius(coordinate, radius, options, callback) {
 
@@ -87,8 +87,7 @@ export default class Traps {
      * @param callback
      * @returns {*}
      */
-    watchStep(step, nextStep, options, callback)
-    {
+    watchStep(step, nextStep, options, callback) {
         options = Object.assign({}, {
             distance: 15,
             innerRadiusTolerance: 0.75,
@@ -96,7 +95,7 @@ export default class Traps {
             courseTolerance: 30,
         }, options);
 
-        const distanceToNextPoint =  options.distance || step.distance.value; // in meters
+        const distanceToNextPoint = options.distance || step.distance.value; // in meters
 
         const coordinate = step.start;
 
@@ -118,13 +117,16 @@ export default class Traps {
      * @param status
      * @returns {*}
      */
-    nextState(trap, event, state)
-    {
+    nextState(trap, event, state) {
         // set new status
         this.traps[trap.index].state = state;
 
+        console.log("------------------- NEXT STATE ---- START -------------------------")
+        console.log({state: this.traps[trap.index].state})
+        console.log("-------------------------- END ----------------------")
+
         // resolve with status
-        if(event.constructor == String) {
+        if (event.constructor == String) {
             trap.callback && trap.callback(trap, event, state);
         }
     }
@@ -132,23 +134,23 @@ export default class Traps {
     /**
      *
      * @param coordinate
+     * @param heading
      * @private
      */
-    __matches(coordinate, heading)
-    {
+    __matches(coordinate, heading) {
         const traps = Object.keys(this.traps);
 
         return traps.map(index => {
 
             const trap = this.traps[index];
 
-            if(trap.state != TrapTypes.States.EXPIRED) {
+            if (trap.state != TrapTypes.States.EXPIRED) {
 
                 switch (trap.type) {
 
                     case TrapTypes.Types.CIRCLE:
 
-                        if(GeoLib.isPointWithinRadius(coordinate, trap.coordinate, trap.radius)) {
+                        if (GeoLib.isPointWithinRadius(coordinate, trap.coordinate, trap.radius)) {
 
                         }
 
@@ -161,43 +163,39 @@ export default class Traps {
                         const insideInner = GeoLib.isPointWithinRadius(coordinate, trap.coordinate, trap.innerRadius);
 
                         const stateMap = {
-                            [TrapTypes.States.OUTSIDE]: [TrapTypes.States.ENTERED, () =>
-                            {
+                            [TrapTypes.States.OUTSIDE]: [TrapTypes.States.ENTERED, () => {
                                 const isWithinCourse = this.isWithinCourse(trap.step.bearing, heading, trap.courseTolerance);
 
                                 return insideOuter ? (isWithinCourse ? TrapTypes.Events.ENTERING_ON_COURSE : TrapTypes.Events.ENTERING_OFF_COURSE) : false;
                             }],
 
-                            [TrapTypes.States.ENTERED]: [TrapTypes.States.INSIDE, () =>
-                            {
+                            [TrapTypes.States.ENTERED]: [TrapTypes.States.INSIDE, () => {
                                 return insideOuter ? TrapTypes.Events.INSIDE : false;
                             }],
 
-                            [TrapTypes.States.INSIDE] : [TrapTypes.States.CENTER, () =>
-                            {
+                            [TrapTypes.States.INSIDE]: [TrapTypes.States.CENTER, () => {
                                 return insideInner ? TrapTypes.Events.INSIDE_CENTER : false;
                             }],
 
-                            [TrapTypes.States.CENTER] : [TrapTypes.States.LEAVING, () =>
-                            {
+                            [TrapTypes.States.CENTER]: [TrapTypes.States.LEAVING, () => {
                                 const isWithinCourse = this.isWithinCourse(trap.nextStep ? trap.nextStep.bearing : trap.step.bearing, heading, trap.courseTolerance);
 
                                 return insideOuter && !insideInner ? (isWithinCourse ? TrapTypes.Events.LEAVING_ON_COURSE : TrapTypes.Events.LEAVING_OFF_COURSE) : false;
                             }],
 
-                            [TrapTypes.States.LEAVING]: [TrapTypes.States.LEFT, () =>
-                            {
+                            [TrapTypes.States.LEAVING]: [TrapTypes.States.LEFT, () => {
                                 return !insideOuter && !insideInner ? TrapTypes.Events.LEAVING : false;
                             }],
 
-                            [TrapTypes.States.LEFT]: [TrapTypes.States.EXPIRED, () =>
-                            {
+                            [TrapTypes.States.LEFT]: [TrapTypes.States.EXPIRED, () => {
                                 return true;
                             }],
                         }
 
-                        if(stateMap[trap.state]) {
-
+                        if (stateMap[trap.state]) {
+                            console.log("------------------- __MATCHES ---- START -------------------------")
+                            console.log({stateMapType: stateMap[trap.state]})
+                            console.log("-------------------------- END ----------------------")
                             const func = stateMap[trap.state];
                             const event = func[1]();
 
@@ -220,16 +218,14 @@ export default class Traps {
      * Quantifier
      * @param bearing
      * @param heading
-     * @param quantifier
+     * @param tolerance
      */
-    isWithinCourse(bearing, heading, tolerance = 0)
-    {
+    isWithinCourse(bearing, heading, tolerance = 0) {
         const low = bearing - tolerance;
         const high = bearing + tolerance;
 
         return ((low < 0 && heading > (360 - (-1 * low))) || (heading > low)) && ((high > 360 && heading < (high - 360)) || (heading < high));
     }
-
 
 
 }
