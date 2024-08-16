@@ -59,7 +59,7 @@ export default class MapViewNavigation extends Component {
         routeStepCourseTolerance: PropTypes.number,
         displayDebugMarkers: PropTypes.bool,
         simulate: PropTypes.bool,
-        snapToRoad: PropTypes.bool,
+        snappedToRoad: PropTypes.bool,
         options: PropTypes.object,
         onPositionChanged: PropTypes.func,
     }
@@ -95,7 +95,7 @@ export default class MapViewNavigation extends Component {
         routeStepCourseTolerance: 30, // in degress
         displayDebugMarkers: false,
         simulate: false,
-        snapToRoad: false,
+        snappedToRoad: false,
         onPositionChanged: undefined,
         options: {},
     }
