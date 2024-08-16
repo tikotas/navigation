@@ -4,7 +4,7 @@
 import React, {Component} from "react"
 import PropTypes from "prop-types"
 import {CoordinatePropType} from "../../constants/PropTypes"
-import {View, TouchableOpacity, Text, Dimensions} from "react-native"
+import {Dimensions} from "react-native"
 import geolocation from "@react-native-community/geolocation"
 import connectTheme from "../../themes"
 import Geocoder from "../../modules/Geocoder"
@@ -18,7 +18,7 @@ import RouteMarker from "../RouteMarker"
 import RoutePolyline from "../RoutePolyline"
 import PositionMarker from "../PositionMarker"
 import {POSITION_ARROW} from "../../constants/MarkerTypes"
-import {Circle, Polygon, Polyline} from "react-native-maps"
+import {Circle, Polyline} from "react-native-maps"
 
 const CONSTANT_VALUE = 20
 const {width, height} = Dimensions.get("window")
@@ -59,6 +59,7 @@ export default class MapViewNavigation extends Component {
         routeStepCourseTolerance: PropTypes.number,
         displayDebugMarkers: PropTypes.bool,
         simulate: PropTypes.bool,
+        snapToRoad: PropTypes.bool,
         options: PropTypes.object,
         onPositionChanged: PropTypes.func,
     }
@@ -94,6 +95,7 @@ export default class MapViewNavigation extends Component {
         routeStepCourseTolerance: 30, // in degress
         displayDebugMarkers: false,
         simulate: false,
+        snapToRoad: false,
         onPositionChanged: undefined,
         options: {},
     }
@@ -131,31 +133,66 @@ export default class MapViewNavigation extends Component {
         this.aspectRatio = width / height
     }
 
+    // componentDidMount() {
+    //     if (!this.state.startTracking) return
+    //     if (!this.props.simulate) {
+    //         this.watchId = geolocation.watchPosition(position => {
+    //                 console.log(position.coords, "<<<--->>> PACKAGE POSITION COORDS <<<--->>>")
+    //                 this.getRoadCoordinates({
+    //                     positionCoords: position.coords,
+    //                     key: this.props.apiKey,
+    //                 })
+    //             },
+    //             (err) => {
+    //                 console.error(err)
+    //             },
+    //             {enableHighAccuracy: true, timeout: 10, maximumAge: 0, distanceFilter: 0})
+    //
+    //     } else {
+    //         this.watchId = geolocation.watchPosition(position => {
+    //             console.log(position.coords, "<<<--->>> PACKAGE SIMULATOR POSITION COORDS <<<--->>>")
+    //             this.getRoadCoordinates({
+    //                 positionCoords: position.coords,
+    //                 key: this.props.apiKey,
+    //             })
+    //         })
+    //     }
+    // }
+
+
     componentDidMount() {
         if (!this.state.startTracking) return
         if (!this.props.simulate) {
             this.watchId = geolocation.watchPosition(position => {
                     console.log(position.coords, "<<<--->>> PACKAGE POSITION COORDS <<<--->>>")
-                    this.getRoadCoordinates({
-                        positionCoords: position.coords,
-                        key: this.props.apiKey,
-                    })
+                    if (this.props.snappedToRoad) {
+                        this.getRoadCoordinates({
+                            positionCoords: position.coords,
+                            key: this.props.apiKey,
+                        })
+                    } else {
+                        this.setPosition(position.coords)
+                    }
                 },
                 (err) => {
                     console.error(err)
                 },
                 {enableHighAccuracy: true, timeout: 10, maximumAge: 0, distanceFilter: 0})
-
         } else {
             this.watchId = geolocation.watchPosition(position => {
                 console.log(position.coords, "<<<--->>> PACKAGE SIMULATOR POSITION COORDS <<<--->>>")
-                this.getRoadCoordinates({
-                    positionCoords: position.coords,
-                    key: this.props.apiKey,
-                })
+                if (this.props.snappedToRoad) {
+                    this.getRoadCoordinates({
+                        positionCoords: position.coords,
+                        key: this.props.apiKey,
+                    })
+                } else {
+                    this.setPosition(position.coords)
+                }
             })
         }
     }
+
 
     /**
      * @componentWillUnmount
@@ -182,28 +219,55 @@ export default class MapViewNavigation extends Component {
         }
     }
 
+    // async getRoadCoordinates({positionCoords, key}) {
+    //     const snappedURL = `https://roads.googleapis.com/v1/snapToRoads?path=${positionCoords.latitude},${positionCoords.longitude}&key=${key}`
+    //     try {
+    //         // this is for always keeping the user on the road!!!!
+    //         const data = await fetch(snappedURL)
+    //         const coordinates = await data.json()
+    //         if (!coordinates) return
+    //
+    //         const newPositionCoords = {
+    //             ...positionCoords,
+    //             coordinate: {
+    //                 latitude: coordinates.snappedPoints[0].location.latitude,
+    //                 longitude: coordinates.snappedPoints[0].location.longitude,
+    //             },
+    //             latitude: coordinates.snappedPoints[0].location.latitude,
+    //             longitude: coordinates.snappedPoints[0].location.longitude,
+    //         }
+    //         this.setPosition(newPositionCoords)
+    //     } catch (err) {
+    //         console.log(err, "<<< ERROR WHILE FETCHING SNAP TO ROAD COORDINATES >>>")
+    //     }
+    // }
+
     async getRoadCoordinates({positionCoords, key}) {
         const snappedURL = `https://roads.googleapis.com/v1/snapToRoads?path=${positionCoords.latitude},${positionCoords.longitude}&key=${key}`
         try {
-            // this is for always keeping the user on the road!!!!
-            const data = await fetch(snappedURL)
-            const coordinates = await data.json()
-            if (!coordinates) return
+            const response = await fetch(snappedURL)
+            const data = await response.json()
+            if (!data || !data.snappedPoints || data.snappedPoints.length === 0) {
+                this.setPosition(positionCoords) // Fallback if snapping fails
+                return
+            }
 
             const newPositionCoords = {
                 ...positionCoords,
                 coordinate: {
-                    latitude: coordinates.snappedPoints[0].location.latitude,
-                    longitude: coordinates.snappedPoints[0].location.longitude,
+                    latitude: data.snappedPoints[0].location.latitude,
+                    longitude: data.snappedPoints[0].location.longitude,
                 },
-                latitude: coordinates.snappedPoints[0].location.latitude,
-                longitude: coordinates.snappedPoints[0].location.longitude,
+                latitude: data.snappedPoints[0].location.latitude,
+                longitude: data.snappedPoints[0].location.longitude,
             }
             this.setPosition(newPositionCoords)
         } catch (err) {
             console.log(err, "<<< ERROR WHILE FETCHING SNAP TO ROAD COORDINATES >>>")
+            this.setPosition(positionCoords) // Fallback if there's an error
         }
     }
+
 
     /**
      * getCoordinates
